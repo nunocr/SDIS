@@ -42,7 +42,8 @@ public class Client{
 			DatagramSocket socket = new DatagramSocket();
 
 			DatagramPacket request = new DatagramPacket(message.getBytes(),message.length(),host,port);
-
+			
+			System.out.println("Request: " + request);
 			socket.send(request);
 
 			byte[] buffer = new byte[1024];
@@ -51,7 +52,7 @@ public class Client{
 
 			socket.receive(reply);
 			String reply_message = new String(buffer);
-			System.out.println(reply_message.trim());
+			System.out.println("Reply:\n" + reply_message.trim());
 
 			socket.close();
 
