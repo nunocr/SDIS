@@ -7,11 +7,27 @@ public class TestApp{
             return;
         }
         
-        int peer_ap = Integer.parseInt(args[0]);
-        if(peer_ap < 0 || peer_ap > 65535){
-            System.out.println("Invalid peer access point: " + args[0]);
-            return;
-        }
+		InetAddress address;
+		int port;
+		try{
+			if(args[0].contains(":")){
+				String[] tokens = peer_ap.split(":");
+				address = InetAddress.getByName(tokens[0]);
+				port = Integer.parseInt(tokens[1]);
+				
+			}else{
+				address = InetAddress.getLocalHost();
+				port = Integer.parseInt(args[0]);
+			}
+		}catch(Exception e){
+			System.out.println("Invalid client address: " + address.getHostName());
+			return;
+		}		
+
+		if(port < 0 || port > 65535){
+			System.out.println("Invalid client port: " + Integer.toString(port));
+			return;
+		}
         
         String sub_protocol = args[1];
         if(
@@ -49,7 +65,7 @@ public class TestApp{
         
         int degree = Integer.parseInt(args[3]);
         if(degree < 0 || degree > 9){
-            System.out.println("Invlaid replication degree: " + args[3]);
+            System.out.println("Invalid replication degree: " + args[3]);
             return;
         }
         
