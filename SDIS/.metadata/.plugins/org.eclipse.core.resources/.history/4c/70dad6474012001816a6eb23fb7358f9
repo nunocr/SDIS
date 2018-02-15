@@ -1,0 +1,55 @@
+import java.io.IOException;
+import java.net.*;
+import java.util.regex.Pattern;
+
+public class Client {
+	public static void main (String[] args) throws IOException{
+	
+		if(!args[0].equals("REGISTER") && !args[0].equals("LOOKUP")){
+			System.out.println("Invalid command; Can either be REGISTER or LOOKUP");
+			return;
+		}
+		
+		if(args[0].equals("REGISTER") && args.length != 3){
+			System.out.println("Invalid nr of arguments for REGISTER command");
+			return;
+		}
+		
+		if(args[0].equals("LOOKUP") && args.length != 2){
+			System.out.println("Invalid nr of arguments for LOOKUP command");
+			return;
+		}
+		
+		if(args.length != 2 && args.length != 3){
+			System.out.print("Invalid number of arguments; Can either be 2 or 3");
+			return;
+		}
+		
+		String plate = args[1];		
+		boolean validPlate = Pattern.matches("^[A-Z0-9]{2}-[A-Z0-9]{2}-[A-Z0-9]{2}", plate);
+		if(!validPlate){
+			System.out.println("Invalid plate");
+			return;
+		}
+		
+		String command = args[0];
+		String message = command + ' ' + plate;
+		
+		if(command.equals("REGISTER")){
+			String owner = args[2];
+			message = message + ' ' + owner; 
+		}
+		
+		System.out.println(message);
+		
+		//send request
+		
+		
+		DatagramSocket socket = new DatagramSocket();
+		byte[] buf = message.getBytes();
+		InetAddress address = InetAddress.getByName(args[0]);
+		DatagramPacket packet = new DatagramPacket(buf, buf.length, address, 4445);
+		socket.send(packet);
+		
+	}
+}
