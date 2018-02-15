@@ -1,63 +1,59 @@
+import java.io.IOException;
 import java.net.*;
-import java.util.*;
-import java.io.*;
-import java.lang.*;
+import java.util.regex.Pattern;
 
-public class Client{
-	public static void main(String[] args){
-
-		try{
-
-			if(args.length < 4)
-				throw new IllegalArgumentException("Usage: java Client <mcast_addr> <mcast_port> <oper> <opnd>*");
-
-			InetAddress host = InetAddress.getByName(args[0]);
-
-			int port = Integer.parseInt(args[1]);
-			if(port < 0 || port > 65535)
-				throw new IllegalArgumentException("Invalid port: " + args[1]);
-
-			String oper = args[2];
-			if(!oper.equals("register") && !oper.equals("lookup"))
-				throw new IllegalArgumentException("Invalid operation: " + args[2]);
-
-			if(oper.equals("register") && args.length != 5 || oper.equals("lookup") && args.length != 4)
-				throw new IllegalArgumentException("Invalid nr of arguments for operation: " + args[2]);
-
-			String plate_number = args[3];
-			if(!plate_number.matches("[A-Z0-9]{2}-[A-Z0-9]{2}-[A-Z0-9]{2}"))
-				throw new IllegalArgumentException("Invalid plate number: " + args[3]);
-
-			String message = oper.toUpperCase() + " " + plate_number;
-
-			if(oper.equals("register")){
-
-				String owner_name = args[4];
-				if(owner_name.length() > 256)
-					throw new IllegalArgumentException("Invalid owner name: " + args[4]);
-
-				message += " " + owner_name;
-			}
-
-			DatagramSocket socket = new DatagramSocket();
-
-			DatagramPacket request = new DatagramPacket(message.getBytes(),message.length(),host,port);
-			
-			System.out.println("Request: " + request);
-			socket.send(request);
-
-			byte[] buffer = new byte[1024];
-			Arrays.fill(buffer,(byte)0);
-			DatagramPacket reply = new DatagramPacket(buffer,buffer.length);
-
-			socket.receive(reply);
-			String reply_message = new String(buffer);
-			System.out.println("Reply:\n" + reply_message.trim());
-
-			socket.close();
-
-		}catch(Exception e){
-			System.out.println(e.getMessage());
-		};
+public class Client {
+	public static void main (String[] args) throws IOException{
+	
+		if(!args[2].equals("REGISTER") && !args[2].equals("LOOKUP")){
+			System.out.println("Invalid command; Can either be REGISTER or LOOKUP");
+			return;
+		}
+		
+		if(args[2].equals("REGISTER") && args.length != 5){
+			System.out.println("Invalid nr of arguments for REGISTER command");
+			return;
+		}
+		
+		if(args[2].equals("LOOKUP") && args.length != 4){
+			System.out.println("Invalid nr of arguments for LOOKUP command");
+			return;
+		}
+		
+		if(args.length != 4 && args.length != 5){
+			System.out.print("Invalid number of arguments; Can either be 2 or 3");
+			return;
+		}
+		
+		String plate = args[3];		
+		boolean validPlate = Pattern.matches("^[A-Z0-9]{2}-[A-Z0-9]{2}-[A-Z0-9]{2}", plate);
+		if(!validPlate){
+			System.out.println("Invalid plate");
+			return;
+		}
+		
+		String command = args[2];
+		String message = command + ' ' + plate;
+		
+		if(command.equals("REGISTER")){
+			String owner = args[4];
+			message = message + ' ' + owner; 
+		}
+		
+		System.out.println(message);
+		
+		String host = args[0];
+		String port = args[1];
+		
+		System.out.println("Host: " + host);
+		System.out.println("Port: " + port);
+		
+		//send request
+		
+		DatagramSocket socket = new DatagramSocket();
+		byte[] buf = message.getBytes();
+		InetAddress address = InetAddress.getByName(host);
+		DatagramPacket packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(port));
+		socket.send(packet);
 	}
 }
