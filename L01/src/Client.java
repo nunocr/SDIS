@@ -55,5 +55,16 @@ public class Client {
 		InetAddress address = InetAddress.getByName(host);
 		DatagramPacket packet = new DatagramPacket(buf, buf.length, address, Integer.parseInt(port));
 		socket.send(packet);
+		
+		//wait for reply
+		
+		DatagramSocket reply_socket = new DatagramSocket(Integer.parseInt(port));
+		byte[] reply_buf = new byte[256];
+		DatagramPacket reply = new DatagramPacket(reply_buf, reply_buf.length);
+		socket.receive(reply);
+		
+		String reply_message = new String(reply.getData());
+		reply_message = reply_message.trim();
+		System.out.println("Server reply: " + reply_message);
 	}
 }
